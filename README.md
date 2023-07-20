@@ -1,3 +1,5 @@
+Arquivos da implementação de uma API utilizando a ferramenta RAMOSE: https://github.com/opencitations/ramose
+
 Para executar a implementação foi utilizado o atalho /test/test_windows.bat
 O comando definido sendo usado foi:
 
