@@ -1,0 +1,55 @@
+#url /api/v1
+#type api
+#base https://sparql-playground.sib.swiss
+#title REST API of the Open Biomedical Citations in Context Corpus (CCC)
+#description This document describes the REST API of the [Open Biomedical Citations in Context Corpus (CCC)](https://w3id.org/oc/ccc) hosted by [OpenCitations](http://opencitations.net). All the operations described in this document return either a JSON document (default) or a CSV document according to the mimetype specified in the `Accept` header of the request.
+
+#version 1.0.0
+#license This document is licensed with a [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0/legalcode), while the REST API itself has been created using [RAMOSE](https://github.com/opencitations/ramose), the *Restful API Manager Over SPARQL Endpoints*, which is licensed with an [ISC license](https://opensource.org/licenses/ISC).
+#contacts [marilena.daquino@opencitations.net](mailto:marilena.daquino@opencitations.net)
+#endpoint https://sparql-playground.sib.swiss
+#method post
+
+
+#url /data/{term}
+#type operation
+#term str(\"?10\..+[^_\"]((__|\" \")10\..+[^_])*\"?)
+#preprocess lower(term) --> split_dois(term)
+#method post
+#description This operation returns bibliographic metadata of one or more articles specified in input by means of their DOIs. In case multiple DOIs are specified, these must be separated with a double underscore ("\_\_") – e.g. "10.1016/j.ejmech.2010.06.013\_\_10.1080/14756366.2020.1740695".
+
+For each input DOI, the fields returned by the operation are the following:
+
+* *term* Termo a ser buscado nas bases;
+
+#call /data/diacylglycerol
+#field_type str(subject) str(label) str(subject2) str(label2) 
+#output_json [
+    {
+        "subject": "X",
+        "label": "X",
+        "subject2": "X",
+        "label2": "X"
+        
+    }
+    
+]
+
+
+SELECT ?subject ?label ?subject2 ?label2 WHERE {
+    
+  
+  SERVICE <https://dbpedia.org/sparql> {
+    { 
+      ?subject rdfs:label ?label. 
+    }
+    UNION { 
+      ?subject2 rdfs:label ?label2. 
+    }
+    #filter( contains(str(?label),str(?_term_str)))
+    #filter( contains(str(?label),str([[term]])))
+  }
+  
+ 
+}limit 10
+

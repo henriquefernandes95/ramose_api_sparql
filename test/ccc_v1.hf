@@ -1,0 +1,111 @@
+#url /api/v1
+#type api
+#base https://w3id.org/oc/ccc
+#title REST API of the Open Biomedical Citations in Context Corpus (CCC)
+#description This document describes the REST API of the [Open Biomedical Citations in Context Corpus (CCC)](https://w3id.org/oc/ccc) hosted by [OpenCitations](http://opencitations.net). All the operations described in this document return either a JSON document (default) or a CSV document according to the mimetype specified in the `Accept` header of the request.
+
+The CCC is based on the Open Access subset of XML articles served by [Europe PubMed Central API](https://europepmc.org/RestfulWebService).
+It includes information mined from the full-text of articles, such as in-text references (e.g. `(Daquino et al. 2020)`), structural elements (sentences, paragraphs, footnotes, captions, tables, and sections), rhetorical elements (e.g. section "Methods"), and the sequential number of the structural elements including in-text reference pointers (e.g. sentence 5, paragraph 2, section 1 "Introduction").
+
+We extend the definition of [Open Citation Identifier (OCI)](https://doi.org/10.6084/m9.figshare.5844972) in order to identify *citation links* that are related to a specific in-text reference pointer, that is, the textual device that references a cited resource in the full-text of the citing resource.
+Specifically, OCI may appear in the form `<citing_id>-<cited_id>{/<nth-occurrence>}`, where:
+
+ * `<citing_id>` is the local identifier assigned to the citing resource in CCC
+ * `<cited_id>` is the local identifier assigned to the cited resource in CCC
+ * `<nth-occurrence>`, is the nth in-text reference pointer at hand denoting the cited resource (if applicable).
+
+For instance `0701-0709/1` identifies the `1`st in-text reference appearing in (the text of) the citing article `0701` that is related to the cited article `0709`.
+
+Moreover, CCC introduces the usage of [In-Text Reference Pointer IDentifier (InTRePID)](https://doi.org/10.6084/m9.figshare.11674032) to identify *in-text reference pointers*.
+It is based on OCI, and it appears in the form `<citing_id>-<cited_id>/<nth-occurrence>-<total-count>`, where:
+
+ * `<citing_id>` is the local identifier assigned to the citing resource in CCC
+ * `<cited_id>` is the local identifier assigned to the cited resource in CCC
+ * `<nth-occurrence>`, is the nth in-text reference pointer at hand denoting the cited resource (if applicable).
+ * `<total-count>` corresponds to the total number of in-text reference pointers related to the same citation.
+
+For instance, `0701-0709/1-2` and `0701-0709/2-2` represent the first and the second in-text reference pointer respectively that appear in the citing article `0701` that are related to the cited article `0709`.
+InTrePIDs are dereferencable and the [InTrePID resolution service](http://opencitations.net/intrepid) allows one to retrieve the citation context  of a given InTrePID (such as identifiers of sentences, paragraphs, and sections where an in-text reference pointer appears).
+
+
+If you would like to suggest additional operations, please use the [CCC issue tracker](https://github.com/opencitations/ccc/issues) available on GitHub to contact us.
+#version 1.0.0
+#license This document is licensed with a [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0/legalcode), while the REST API itself has been created using [RAMOSE](https://github.com/opencitations/ramose), the *Restful API Manager Over SPARQL Endpoints*, which is licensed with an [ISC license](https://opensource.org/licenses/ISC).
+#contacts [marilena.daquino@opencitations.net](mailto:marilena.daquino@opencitations.net)
+#endpoint http://opencitations.net/ccc/sparql
+#method post
+#addon ccc_addon
+
+#url /data/{term}
+#type operation
+#dois str(\"?10\..+[^_\"]((__|\" \")10\..+[^_])*\"?)
+#preprocess lower(dois) --> split_dois(dois)
+#method get
+#description This operation returns bibliographic metadata of one or more articles specified in input by means of their DOIs. In case multiple DOIs are specified, these must be separated with a double underscore ("\_\_") – e.g. "10.1016/j.ejmech.2010.06.013\_\_10.1080/14756366.2020.1740695".
+
+For each input DOI, the fields returned by the operation are the following:
+
+* *ccc_id* the CCC local identifier of the specified bibliographic resource (e.g. "br/0709, br/0701");
+* *author* the semicolon-separated list of authors of the specified bibliographic resource;
+* *year* the year, year-month, or year-month-day of publication of the specified bibliographic resource;
+* *title* the title of the specified bibliographic resource;
+* *source_title* the title of the venue where the bibliographic resource is published (e.g. journal title);
+* *volume* the number of the volume in which the specified bibliographic resource has been published;
+* *issue* the number of the issue in which the specified bibliographic resource has been published;
+* *page* the starting and ending pages of the specified bibliographic resource in the context of the venue where it has been published;
+* *doi* the DOI of the specified bibliographic resource;
+* *occ_reference* the semicolon-separated CCC local identifiers of all the bibliographic resources cited by the specified bibliographic resource;
+* *doi_reference* the semicolon-separated DOIs of all the cited bibliographic resources that have such identifier associated;
+* *citation_count* the number of citations received by the specified bibliographic resource.
+#call /data/diacylglycerol/
+#field_type str(subject) str(label2) str(subject2) str(label2) 
+#output_json [
+    {
+        "ccc_id": "br/0701",
+        "author": "Li, Xin; Vinothini, Kandasamy; Ramesh, Thiyagarajan; Rajan, Mariappan; Ramu, Andy",
+        "year": "2020",
+        "title": "Combined photodynamic-chemotherapy investigation of cancer cells using carbon quantum dot-based drug carrier system",
+        "source_title": "Drug Delivery",
+        "volume": "27",
+        "issue": "1",
+        "page": "791-804",
+        "doi": "10.1080/10717544.2020.1765431",
+        "occ_reference": "br/07010; br/070101; br/070104; br/070105; br/070107; br/070110; br/07014; br/07018; br/07019; br/07022; br/07025; br/07029; br/07033; br/07034; br/07036; br/07040; br/07041; br/07045; br/07049; br/0705; br/07050; br/07054; br/07055; br/07059; br/07060; br/07064; br/07067; br/07071; br/07075; br/07078; br/07080; br/07081; br/07084; br/07088; br/0709; br/07090; br/07093; br/07097",
+        "doi_reference": "10.1186/s11671-017-2408-y; 10.1021/acsami.7b15780; 10.1021/acsami.7b00927; 10.1016/j.talanta.2015.04.015; 10.1016/j.ijpharm.2017.06.072; 10.1016/j.jphotobiol.2019.111578; 10.1016/j.ijleo.2017.12.200; 10.1021/acsbiomaterials.7b00689; 10.1039/c7tb01130j; 10.1016/j.jphotobiol.2019.111598; 10.1007/s00604-014-1389-0; 10.1021/acsnano.9b06168; 10.1002/smll.201501923; 10.1016/j.jab.2017.02.004; 10.1186/s40824-018-0120-3; 10.1039/c7ra04549b; 10.1007/s11060-019-03103-4; 10.1016/j.biopha.2016.12.108; 10.1021/acsami.6b02790; 10.1038/srep01104; 10.1016/j.matchemphys.2018.07.022; 10.1016/j.biopha.2016.03.015; 10.1038/s41598-017-05540-5; 10.1039/c8pp00362a; 10.1016/j.biopha.2018.12.008; 10.1016/j.carbpol.2018.09.035; 10.1016/j.biomaterials.2011.07.032; 10.7150/thno.6535",
+        "citation_count": "1"
+    },
+    {
+        "ccc_id": "br/0705",
+        "author": "Abdous, Behnaz; Sajjadi, S.; Ma'mani, Leila",
+        "year": "2017-07-01",
+        "title": "Î²-Cyclodextrin modified mesoporous silica nanoparticles as a nano-carrier: Response surface methodology to investigate and optimize loading and release processes for curcumin delivery",
+        "source_title": "Journal of Applied Biomedicine",
+        "volume": "15",
+        "issue": "3",
+        "page": "210-218",
+        "doi": "10.1016/j.jab.2017.02.004",
+        "occ_reference": "",
+        "doi_reference": "",
+        "citation_count": "1"
+    }
+]
+
+#sparql PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?subject ?label ?subject2 ?label2 WHERE {
+    VALUES ?_term_str {[[term]]}
+  
+  SERVICE <https://dbpedia.org/sparql> {
+    { 
+      ?subject rdfs:label ?label. 
+    }
+    UNION { 
+      ?subject2 rdfs:label ?label2. 
+    }
+    filter( contains(str(?label),str(?_term_str)))
+    
+  }
+  
+ 
+}limit 10
+
